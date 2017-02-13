@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "doc": "./node_modules/.bin/jsdoc -d doc index.js"
+    "docs": "./node_modules/.bin/typedoc --out docs src/"
   },
   "repository": {
     "type": "git",
@@ -21,5 +21,8 @@
   "bugs": {
     "url": "https://github.com/Skeen/CuraJS/issues"
   },
-  "homepage": "https://github.com/Skeen/CuraJS#readme"
+  "homepage": "https://github.com/Skeen/CuraJS#readme",
+  "devDependencies": {
+    "typedoc": "^0.5.5"
+  }
 }
