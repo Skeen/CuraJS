@@ -1,0 +1,25 @@
+{
+  "name": "curajs",
+  "version": "0.0.1",
+  "description": "JavaScript binding and compilation of CuraEngine.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "doc": "./node_modules/.bin/jsdoc -d doc index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Skeen/CuraJS.git"
+  },
+  "keywords": [
+    "3D",
+    "printer",
+    "slicer"
+  ],
+  "author": "Emil 'Skeen' Madsen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Skeen/CuraJS/issues"
+  },
+  "homepage": "https://github.com/Skeen/CuraJS#readme"
+}
