@@ -19,7 +19,7 @@
     "slicer"
   ],
   "author": "Emil 'Skeen' Madsen",
-  "license": "ISC",
+  "license": "AGPLv3",
   "bugs": {
     "url": "https://github.com/Skeen/CuraJS/issues"
   },
