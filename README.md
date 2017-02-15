@@ -1,9 +1,6 @@
 [![Build Status](https://travis-ci.org/Skeen/CuraJS.svg?branch=master)](https://travis-ci.org/Skeen/CuraJS)
 [![Dependency Status](https://david-dm.org/Skeen/CuraJS.svg)](https://david-dm.org/Skeen/CuraJS)
-[![License]](https://github.com/Skeen/CuraJS/blob/master/LICENSE)
-
-[//]: # (badge.fury.io npm package version)
-[//]: # (img.shields.io npm download counter)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](http://www.gnu.org/licenses/agpl-3.0)
 
 CuraJS
 ======
