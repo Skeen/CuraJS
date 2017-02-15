@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "docs": "typedoc --out docs src/",
     "pretest": "make build/CuraEngineInternal.js",
-    "test": "mocha"
+    "test": "mocha --timeout 15000"
   },
   "repository": {
     "type": "git",
