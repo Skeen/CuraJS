@@ -1,15 +1,22 @@
+const EventEmitter = require('events');
+var emitter = new EventEmitter();
+
 // Module configured by:
 // http://kripken.github.io/emscripten-site/docs/api_reference/module.html#module
 var Module = {};
 Module['noInitialRun'] = true;
 Module['noExitRuntime'] = true;
-Module['setStatus'] = function(a)
+Module['setStatus'] = function(text)
 {
-    console.log(a);
+    emitter.emit('status', text);
 }
-Module['onRuntimeInitialized'] = function(a)
+Module['print'] = function(text)
 {
-    console.log("Runtime Initialized");
+    emitter.emit('stdout', text);
+}
+Module['printErr'] = function(text)
+{
+    emitter.emit('stderr', text);
 }
 
 // NOTE: res/CuraJS-Engine.js will inserted here, during build:
@@ -19,6 +26,8 @@ Module['onRuntimeInitialized'] = function(a)
 // NOTE: At this point we're back in CuraEngineInternal.js
 
 module.exports = {
+    emitter: emitter,
+
     // Call the main function of the engine
     main: function(argv) {
         try {
@@ -30,31 +39,23 @@ module.exports = {
         }
     },
 
-    save_x : function(data, data_encoding) {
+    write_file : function(name, data_encoding, data) {
         try {
-            FS.writeFile('a.stl', data, { encoding: data_encoding});
+            FS.writeFile(name, data, { encoding: data_encoding});
         }
         catch(err) {
-            Module['setStatus']("Invalid attempt at writing a.stl!" + err);
+            Module['setStatus']("Invalid attempt at writing file: " + err);
         }
-    },
-
-    // Save an ascii stl file to the virtual file system
-    save_ascii: function(ascii) {
-        this.save_x(ascii, 'utf8');
-    },
-    save_binary: function(binary) {
-        this.save_x(binary, 'binary');
     },
 
     // Read the gcode output from the virtual file system
-    get_gcode: function() {
+    read_file: function(name, data_encoding) {
         try {
-            return FS.readFile('a.gcode', { encoding: 'utf8' });
+            return FS.readFile(name, { encoding: data_encoding});
         }
         catch(err) {
-            Module['setStatus']("Invalid attempt at reading a.gcode!" + err);
-            return "";
+            Module['setStatus']("Invalid attempt at reading file: " + err);
+            return undefined;
         }
     }
 };
