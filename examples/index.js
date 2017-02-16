@@ -2,7 +2,7 @@ var engine = require("./../build/CuraEngineInternal.js");
 
 var fs = require('fs');
 
-fs.readFile("res/model.stl", "ascii", function(err, data)
+fs.readFile("res/model-binary.stl", "ascii", function(err, data)
 {
     if(err)
     {

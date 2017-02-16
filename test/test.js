@@ -93,7 +93,7 @@ describe('CuraEngineInternal', function()
 
             // Load testing 3D model
             var fs = require('fs');
-            var stl_file = fs.readFileSync("res/model.stl", "ascii");
+            var stl_file = fs.readFileSync("res/model-binary.stl", "ascii");
 
             // Write file to file system
             engine.write_file("a.stl", "utf8", stl_file);
