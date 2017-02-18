@@ -87,6 +87,24 @@ describe('CuraEngineInternal', function()
             // TODO: Check invariants about gcode header
         });
 
+        it('should output customizable end gcode, when given by configuration', function()
+        {
+            var engine = require("./../build/CuraEngineInternal.js");
+
+            // Write the endCode in the configuration file
+            engine.write_file("default.cfg", "utf8", "endCode = ; TEST END GCODE");
+            engine.main(["-o", "a.gcode"]);
+
+            var gcode = engine.read_file("a.gcode", "utf8");
+            // Check gcode
+            //-------------
+            var gcode_arr = gcode.split('\n');
+            // Check that it has the end gcode
+            assert.equal(gcode_arr[gcode_arr.length-2], // Second last line
+                    "; TEST END GCODE",
+                    "Expected gcode end to be in output");
+        });
+
         it('should output gcode when run with stl file', function()
         {
             var engine = require("./../build/CuraEngineInternal.js");
