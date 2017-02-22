@@ -2,5 +2,7 @@ docs/
 node_modules/
 build/
 tmp/
+dist/
+typings/
 *.swo
 *.swp

@@ -1,5 +1,12 @@
-const EventEmitter = require('events');
-var emitter = new EventEmitter();
+var callbacks = {};
+var fire_callback = function(name, text)
+{
+    var callback = callbacks[name];
+    if(callback)
+    {
+        callback(text);
+    }
+}
 
 // Module configured by:
 // http://kripken.github.io/emscripten-site/docs/api_reference/module.html#module
@@ -8,15 +15,15 @@ Module['noInitialRun'] = true;
 Module['noExitRuntime'] = true;
 Module['setStatus'] = function(text)
 {
-    emitter.emit('status', text);
+    fire_callback('status', text);
 }
 Module['print'] = function(text)
 {
-    emitter.emit('stdout', text);
+    fire_callback('stdout', text);
 }
 Module['printErr'] = function(text)
 {
-    emitter.emit('stderr', text);
+    fire_callback('stderr', text);
 }
 
 // NOTE: res/CuraJS-Engine.js will inserted here, during build:
@@ -26,36 +33,40 @@ Module['printErr'] = function(text)
 // NOTE: At this point we're back in CuraEngineInternal.js
 
 module.exports = {
-    emitter: emitter,
+    setup_callback: function(name, callback) {
+        callbacks[name] = callback;
+    },
 
     // Call the main function of the engine
-    main: function(argv) {
+    main: function(argv, callback) {
         try {
             //Module['run'](argv);
             Module['callMain'](argv);
+            callback(undefined);
         }
         catch(err) {
-            Module['setStatus']("Error while running main!" + err);
+            callback("Error while running main!" + err);
         }
     },
 
-    write_file : function(name, data_encoding, data) {
+    write_file : function(name, data_encoding, data, callback) {
         try {
             FS.writeFile(name, data, { encoding: data_encoding});
+            callback(undefined);
         }
         catch(err) {
-            Module['setStatus']("Invalid attempt at writing file: " + err);
+            callback("Invalid attempt at writing file: " + err);
         }
     },
 
     // Read the gcode output from the virtual file system
-    read_file: function(name, data_encoding) {
+    read_file: function(name, data_encoding, callback) {
         try {
-            return FS.readFile(name, { encoding: data_encoding});
+            var contents = FS.readFile(name, { encoding: data_encoding});
+            callback(undefined, contents);
         }
         catch(err) {
-            Module['setStatus']("Invalid attempt at reading file: " + err);
-            return undefined;
+            callback("Invalid attempt at reading file: " + err);
         }
     }
 };

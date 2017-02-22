@@ -25,7 +25,15 @@
   },
   "homepage": "https://github.com/Skeen/CuraJS#readme",
   "devDependencies": {
+    "browserify": "^14.1.0",
     "mocha": "^3.2.0",
-    "typedoc": "^0.5.5"
+    "typedoc": "^0.5.5",
+    "typings": "^2.1.0"
+  },
+  "dependencies": {
+    "bufferutil": "^2.0.1",
+    "detect-node": "^2.0.3",
+    "utf-8-validate": "^3.0.1",
+    "ws": "^2.1.0"
   }
 }

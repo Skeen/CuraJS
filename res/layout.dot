@@ -1,0 +1,10 @@
+digraph dependency {
+   CuraJSEngine -> CuraEngineInternal;
+   CuraEngineInternal -> CuraEngineWorker;
+
+   CuraNative -> IEngine;
+   CuraEngineInternal -> IEngine;
+   CuraEngineWorker -> IEngine;
+
+   IEngine -> CuraJS;
+}
