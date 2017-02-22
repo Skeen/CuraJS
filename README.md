@@ -11,3 +11,7 @@ License
 =======
 CuraEngine / CuraJS is released under terms of the AGPLv3 License.
 Terms of the license can be found in the LICENSE file. Or at http://www.gnu.org/licenses/agpl.html
+
+Usage
+=====
+For usage see the examples folder.
