@@ -1,22 +1,38 @@
 var assert = require('assert');
 
-/*
-var oneShotListener = function(emitter, eventname, callback)
-{
-    var handler = function()
-    {
-        callback.apply(this, arguments);
-
-        emitter.removeListener(eventname, handler);
-    }
-
-    emitter.addListener(eventname, handler);
-}
-*/
-
 describe('CuraEngineInternal', function()
 {
-    describe('Running', function()
+    // TODO: Test against native binary?
+    // TODO: Test more scenarios.
+
+    var collect_streams_main = function(engine, argv, callback)
+    {
+        // Collect stdout
+        var stdout = "";
+        engine.setup_callback("stdout", function(text)
+        {
+            stdout += text + "\n";
+        });
+        // ... and stderr
+        var stderr = "";
+        engine.setup_callback("stderr", function(text)
+        {
+            stderr += text + "\n";
+        });
+        // ... and status
+        var stats = "";
+        engine.setup_callback("status", function(text)
+        {
+            stats += text + "\n";
+        });
+        // Run engine without arguments
+        engine.main([], function(err)
+        {
+            callback(err, stdout, stderr, stats);
+        });
+    }
+
+    describe('Running without input file', function()
     {
         var engine;
 
@@ -27,23 +43,10 @@ describe('CuraEngineInternal', function()
 
         it('should print information when run without args', function(done)
         {
-            // Collect stdout
-            var stdout = "";
-            engine.setup_callback("stdout", function(text)
-            {
-                stdout += text + "\n";
-            });
-            // ... and stderr
-            var stderr = "";
-            engine.setup_callback("stderr", function(text)
-            {
-                stderr += text + "\n";
-            });
-            // Run engine without arguments
-            engine.main([], function(err)
+            collect_streams_main(engine, [], function(err, stdout, stderr, stats)
             {
                 // Check no errors occured during execution
-                if(err) done(err);
+                if(err) { done(err); return; }
 
                 // Check stderr
                 //-------------
@@ -81,11 +84,11 @@ describe('CuraEngineInternal', function()
         {
             engine.main(["-o", "a.gcode"], function(err)
             {
-                if(err) done(err);
+                if(err) { done(err); return; }
 
                 var gcode = engine.read_file("a.gcode", "utf8", function(err, gcode)
                 {
-                    if(err) done(err);
+                    if(err) { done(err); return; }
 
                     // Check that it starts as we expect
                     assert(gcode.startsWith(";Generated with Cura_SteamEngine DEV_WEB"),
@@ -106,15 +109,15 @@ describe('CuraEngineInternal', function()
             // Write the endCode in the configuration file
             engine.write_file("default.cfg", "utf8", "endCode = ; TEST END GCODE", function(err)
             {
-                if(err) done(err);
+                if(err) { done(err); return; }
 
                 engine.main(["-o", "a.gcode"], function(err)
                 {
-                    if(err) done(err);
+                    if(err) { done(err); return; }
 
                     engine.read_file("a.gcode", "utf8", function(err, gcode)
                     {
-                        if(err) done(err);
+                        if(err) { done(err); return; }
 
                         // Check gcode
                         //-------------
@@ -129,27 +132,61 @@ describe('CuraEngineInternal', function()
                 });
             });
         });
+    });
 
-        it('should output gcode when run with stl file', function(done)
+    var test_suite = function(filename)
+    {
+        return function()
         {
-            // Load testing 3D model
-            var fs = require('fs');
-            var stl_file = fs.readFileSync("res/model-binary.stl", "ascii");
+            var engine;
 
-            // Write file to file system
-            engine.write_file("a.stl", "utf8", stl_file, function(err)
+            before(function(before_done)
             {
-                if(err) done(err);
+                engine = require("./../build/CuraEngineInternal.js");
+                // Load testing 3D model
+                var fs = require('fs');
+                fs.readFile(filename, 'ascii', function(err, stl_file)
+                {
+                    if(err) { before_done(err); return; }
 
+                    engine.write_file("a.stl", "utf8", stl_file, function(err)
+                    {
+                        if(err) { before_done(err); return; }
+
+                        before_done();
+                    });
+                });
+            });
+
+            it('should not throw error when reading non-existant files', function(done)
+            {
+                engine.read_file("NO_EXIST", "utf8", function(err, stl_file)
+                {
+                    if(err) done();
+                    else done("Read non existing file, without error");
+                });
+            });
+
+            it('should read the input file', function(done)
+            {
+                engine.read_file("a.stl", "utf8", function(err, stl_file)
+                {
+                    if(err) done(err);
+                    else done();
+                });
+            });
+
+            it('should output gcode when run', function(done)
+            {
                 // Run slicer
                 engine.main(["-o", "a.gcode", "a.stl"], function(err)
                 {
-                    if(err) done(err);
+                    if(err) { done(err); return; }
 
                     // Grab output
                     engine.read_file("a.gcode", "utf8", function(err, gcode)
                     {
-                        if(err) done(err);
+                        if(err) { done(err); return; }
 
                         // Check that it starts as we expect
                         assert(gcode.startsWith(";Generated with Cura_SteamEngine DEV_WEB"),
@@ -164,6 +201,9 @@ describe('CuraEngineInternal', function()
                     });
                 });
             });
-        });
-    });
+        };
+    }
+
+    describe('Running with binary STL', test_suite("res/model-binary.stl"));
+    describe('Running with ASCII STL', test_suite("res/model-ascii.stl"));
 });
