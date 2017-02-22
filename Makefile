@@ -12,7 +12,10 @@ test: all
 docs: all
 	./node_modules/typedoc/bin/typedoc --out docs src/
 
-.PHONY: example test docs
+clean:
+	rm -rf dist build
+
+.PHONY: example test docs clean
 
 #################
 # BUILD TARGETS #
@@ -28,5 +31,8 @@ build/CuraEngineInternal.js: tmp/CuraJS-Engine.js res/CuraEngineInternal.js
 build/CuraJS.js: dist/CuraJS.js build/CuraEngineInternal.js
 	./node_modules/browserify/bin/cmd.js $< -o $@
 
-dist/CuraJS.js: src/CuraJS.ts
+typings/index.d.ts:
+	./node_modules/typings/dist/bin.js install
+
+dist/CuraJS.js: src/CuraJS.ts typings/index.d.ts
 	./node_modules/typescript/bin/tsc --outDir dist/ $<
