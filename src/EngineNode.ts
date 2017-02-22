@@ -14,17 +14,21 @@ export class EngineNode extends EventEmitter implements IEngine
 
     load(callback : ErrorCallback) : void
     {
+        callback("Not implemented!");
     }
 
     main(argv : Array<string>, callback : ErrorCallback) : void
     {
+        callback("Not implemented!");
     }
 
     write_file(name : string, data_encoding : string, data : any, callback : ErrorCallback) : void
     {
+        callback("Not implemented!");
     }
 
     read_file(name : string, data_encoding : string, callback : ReadCallback)
     {
+        callback("Not implemented!");
     }
 }

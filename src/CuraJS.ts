@@ -1,4 +1,4 @@
-import { ErrorCallback, IEngine } from "./common"
+import { ErrorCallback, ReadCallback, IEngine } from "./common"
 
 import { EngineNode } from "./EngineNode";
 import { EngineJS } from "./EngineJS";
@@ -9,7 +9,7 @@ var isNode = require('detect-node');
 /**
  * Interface for JavaScript slicer
  */
-class CuraJS
+export class CuraJS
 {
     /**
      * Reference to an IEngine instance.
@@ -41,7 +41,7 @@ class CuraJS
      *
      * @param callback Callback function, for when the engine has finished loading.
      */
-     load(callback ?: ErrorCallback) : void
+     load(callback ?: ReadCallback) : void
      {
         // Ensure ww haven't already loaded an engine
         if(this.is_loaded())
@@ -67,7 +67,10 @@ class CuraJS
             }
         }
         // Load the engine itself
-        this.engine.load(callback);
+        this.engine.load(function(err)
+        {
+            callback(err, (<any>this.engine.constructor).name)
+        }.bind(this));
     }
 
     /**
@@ -92,7 +95,7 @@ class CuraJS
      */
     get_config() : Object
     {
-        return {};
+        return {x: "WOW"};
     }
 
 /*
