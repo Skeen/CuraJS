@@ -5,9 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "make",
-    "docs": "typedoc --out docs src/",
-    "pretest": "make build/CuraEngineInternal.js",
-    "test": "mocha --timeout 15000"
+    "test": "make test"
   },
   "repository": {
     "type": "git",

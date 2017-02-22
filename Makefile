@@ -1,5 +1,22 @@
-all: testEngine
+#################
+# PHONY TARGETS #
+#################
+all: build/CuraJS.js
 
+example: all
+	node examples/index.js
+
+test: all
+	./node_modules/mocha/bin/mocha --timeout 15000
+
+docs: all
+	./node_modules/typedoc/bin/typedoc --out docs src/
+
+.PHONY: example test docs
+
+#################
+# BUILD TARGETS #
+#################
 tmp/CuraJS-Engine.js:
 	mkdir -p $(dir $@)
 	./tools/CuraJS-Engine.sh > $@
@@ -7,10 +24,6 @@ tmp/CuraJS-Engine.js:
 build/CuraEngineInternal.js: tmp/CuraJS-Engine.js res/CuraEngineInternal.js
 	mkdir -p $(dir $@)
 	sed -e '/INSERT-CURA-ENGINE-COMPILED/ {' -e 'r $<' -e 'd' -e '}' res/CuraEngineInternal.js > $@
-
-testEngine: build/CuraEngineInternal.js examples/index.js
-	node examples/index.js
-
 
 build/CuraJS.js: dist/CuraJS.js build/CuraEngineInternal.js
 	./node_modules/browserify/bin/cmd.js $< -o $@
