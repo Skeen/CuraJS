@@ -18,116 +18,152 @@ describe('CuraEngineInternal', function()
 {
     describe('Running', function()
     {
-        it('should load the engine', function() {
-            var engine = require("./../build/CuraEngineInternal.js");
+        var engine;
+
+        before(function(before_done) {
+            engine = require("./../build/CuraEngineInternal.js");
+            before_done();
         });
 
-        it('should print information when run without args', function()
+        it('should print information when run without args', function(done)
         {
-            var engine = require("./../build/CuraEngineInternal.js");
-
             // Collect stdout
             var stdout = "";
-            engine.emitter.on("stdout", function(text)
+            engine.setup_callback("stdout", function(text)
             {
                 stdout += text + "\n";
             });
             // ... and stderr
             var stderr = "";
-            engine.emitter.on("stderr", function(text)
+            engine.setup_callback("stderr", function(text)
             {
                 stderr += text + "\n";
             });
             // Run engine without arguments
-            engine.main([]);
-            
-            // Check stderr
-            //-------------
-            var stderr_arr = stderr.split('\n');
-            // Check that we've got version string
-            assert.equal(stderr_arr[0],
-                    "Cura_SteamEngine version DEV_WEB",
-                    "Expected stderr to have version header");
-            // Check that we've got copyright string
-            assert.equal(stderr_arr[1],
-                    "Copyright (C) 2014 David Braam",
-                    "Expected stderr to have copyright header");
-            // Check that we've got license string
-            assert.equal(stderr_arr[3],
-                    "This program is free software: you can redistribute it and/or modify",
-                    "Expected stderr to have license header");
-            // Check that no configuration is used
-            assert.equal(stderr_arr[15],
-                    "Default config \'default.cfg\' not used",
-                    "Expected stderr to have configuration line");
-            
-            // Check stdout
-            //-------------
-            var stdout_arr = stdout.split('\n');
-            // Check that we've got some gcodes
-            assert.deepEqual([stdout_arr[0], stdout_arr[5].substr(0,3), stdout_arr[9].substr(0,3)],
-                    ['M107', 'G91', 'M84'],
-                    "Expected stdout to have gcode header");
+            engine.main([], function(err)
+            {
+                // Check no errors occured during execution
+                if(err) done(err);
+
+                // Check stderr
+                //-------------
+                var stderr_arr = stderr.split('\n');
+                // Check that we've got version string
+                assert.equal(stderr_arr[0],
+                        "Cura_SteamEngine version DEV_WEB",
+                        "Expected stderr to have version header");
+                // Check that we've got copyright string
+                assert.equal(stderr_arr[1],
+                        "Copyright (C) 2014 David Braam",
+                        "Expected stderr to have copyright header");
+                // Check that we've got license string
+                assert.equal(stderr_arr[3],
+                        "This program is free software: you can redistribute it and/or modify",
+                        "Expected stderr to have license header");
+                // Check that no configuration is used
+                assert.equal(stderr_arr[15],
+                        "Default config \'default.cfg\' not used",
+                        "Expected stderr to have configuration line");
+                
+                // Check stdout
+                //-------------
+                var stdout_arr = stdout.split('\n');
+                // Check that we've got some gcodes
+                assert.deepEqual([stdout_arr[0], stdout_arr[5].substr(0,3), stdout_arr[9].substr(0,3)],
+                        ['M107', 'G91', 'M84'],
+                        "Expected stdout to have gcode header");
+
+                done();
+            });
         });
 
-        it('should output gcode header when run without args', function()
+        it('should output gcode header when run without args', function(done)
         {
-            var engine = require("./../build/CuraEngineInternal.js");
+            engine.main(["-o", "a.gcode"], function(err)
+            {
+                if(err) done(err);
 
-            engine.main(["-o", "a.gcode"]);
+                var gcode = engine.read_file("a.gcode", "utf8", function(err, gcode)
+                {
+                    if(err) done(err);
 
-            var gcode = engine.read_file("a.gcode", "utf8");
-            // Check that it starts as we expect
-            assert(gcode.startsWith(";Generated with Cura_SteamEngine DEV_WEB"),
-                    "Expected gcode to have Cura header");
-            // Check the size of gcode
-            assert(gcode.split('\n').length < 20,
-                    "Expected less than 20 lines in gcode file header");
+                    // Check that it starts as we expect
+                    assert(gcode.startsWith(";Generated with Cura_SteamEngine DEV_WEB"),
+                            "Expected gcode to have Cura header");
+                    // Check the size of gcode
+                    assert(gcode.split('\n').length < 20,
+                            "Expected less than 20 lines in gcode file header");
 
-            // TODO: Check invariants about gcode header
+                    // TODO: Check invariants about gcode header
+                    
+                    done();
+                });
+            });
         });
 
-        it('should output customizable end gcode, when given by configuration', function()
+        it('should output customizable end gcode, when given by configuration', function(done)
         {
-            var engine = require("./../build/CuraEngineInternal.js");
-
             // Write the endCode in the configuration file
-            engine.write_file("default.cfg", "utf8", "endCode = ; TEST END GCODE");
-            engine.main(["-o", "a.gcode"]);
+            engine.write_file("default.cfg", "utf8", "endCode = ; TEST END GCODE", function(err)
+            {
+                if(err) done(err);
 
-            var gcode = engine.read_file("a.gcode", "utf8");
-            // Check gcode
-            //-------------
-            var gcode_arr = gcode.split('\n');
-            // Check that it has the end gcode
-            assert.equal(gcode_arr[gcode_arr.length-2], // Second last line
-                    "; TEST END GCODE",
-                    "Expected gcode end to be in output");
+                engine.main(["-o", "a.gcode"], function(err)
+                {
+                    if(err) done(err);
+
+                    engine.read_file("a.gcode", "utf8", function(err, gcode)
+                    {
+                        if(err) done(err);
+
+                        // Check gcode
+                        //-------------
+                        var gcode_arr = gcode.split('\n');
+                        // Check that it has the end gcode
+                        assert.equal(gcode_arr[gcode_arr.length-2], // Second last line
+                                "; TEST END GCODE",
+                                "Expected gcode end to be in output");
+
+                        done();
+                    });
+                });
+            });
         });
 
-        it('should output gcode when run with stl file', function()
+        it('should output gcode when run with stl file', function(done)
         {
-            var engine = require("./../build/CuraEngineInternal.js");
-
             // Load testing 3D model
             var fs = require('fs');
             var stl_file = fs.readFileSync("res/model-binary.stl", "ascii");
 
             // Write file to file system
-            engine.write_file("a.stl", "utf8", stl_file);
-            // Run slicer
-            engine.main(["-o", "a.gcode", "a.stl"]);
-            // Grab output
-            var gcode = engine.read_file("a.gcode", "utf8");
+            engine.write_file("a.stl", "utf8", stl_file, function(err)
+            {
+                if(err) done(err);
 
-            // Check that it starts as we expect
-            assert(gcode.startsWith(";Generated with Cura_SteamEngine DEV_WEB"),
-                    "Expected gcode to have Cura header");
-            // Check the size of gcode
-            assert(gcode.split('\n').length > 1500,
-                    "Expected more than 1500 lines in gcode file output");
+                // Run slicer
+                engine.main(["-o", "a.gcode", "a.stl"], function(err)
+                {
+                    if(err) done(err);
 
-            // TODO: Check invariants about gcode
+                    // Grab output
+                    engine.read_file("a.gcode", "utf8", function(err, gcode)
+                    {
+                        if(err) done(err);
+
+                        // Check that it starts as we expect
+                        assert(gcode.startsWith(";Generated with Cura_SteamEngine DEV_WEB"),
+                                "Expected gcode to have Cura header");
+                        // Check the size of gcode
+                        assert(gcode.split('\n').length > 1500,
+                                "Expected more than 1500 lines in gcode file output");
+
+                        // TODO: Check invariants about gcode
+                        
+                        done();
+                    });
+                });
+            });
         });
     });
 });

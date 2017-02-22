@@ -2,7 +2,7 @@ var engine = require("./../build/CuraEngineInternal.js");
 
 var fs = require('fs');
 
-fs.readFile("res/model-binary.stl", "ascii", function(err, data)
+fs.readFile("res/model-ascii.stl", "ascii", function(err, data)
 {
     if(err)
     {
@@ -10,33 +10,52 @@ fs.readFile("res/model-binary.stl", "ascii", function(err, data)
         process.exit(1);
     }
 
-    engine.emitter.on('stdout', function(text)
+    engine.setup_callback('stdout', function(text)
+    {
+        console.log(text);
+    });
+    engine.setup_callback('status', function(text)
+    {
+        console.log(text);
+    });
+    engine.setup_callback('stderr', function(text)
     {
         console.log(text);
     });
 
-    engine.emitter.on('status', function(text)
+    engine.write_file("a.stl", "utf8", data, function(err)
     {
-        console.log(text);
+        if(err)
+        {
+            console.error(err);
+            process.exit(1);
+        }
+
+        engine.main(["-o", "a.gcode", "a.stl"], function(err)
+        {
+            if(err)
+            {
+                console.error(err);
+                process.exit(1);
+            }
+
+            console.log();
+            console.log("AFTER RUN");
+            console.log();
+
+            engine.read_file("a.gcode", "utf8", function(err, gcode)
+            {
+                if(err)
+                {
+                    console.error(err);
+                    process.exit(1);
+                }
+             
+                console.log(gcode);
+                console.log("AFTER GCODE!");
+                console.log();
+            });
+        });
     });
-
-    engine.emitter.on('stderr', function(text)
-    {
-        console.log(text);
-    });
-
-    engine.write_file("a.stl", "utf8", data);
-    engine.main(["-o", "a.gcode", "a.stl"]);
-
-    console.log();
-    console.log("AFTER RUN");
-    console.log();
-
-    var gcode = engine.read_file("a.gcode", "utf8");
-
-    console.log(gcode);
-
-    console.log("AFTER GCODE!");
-    console.log();
 });
 
