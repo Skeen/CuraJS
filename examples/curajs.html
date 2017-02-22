@@ -1,13 +1,13 @@
 <html>
 <head>
-    <script src="./../build/CuraJS.js"></script>
+    <script src="./../build/browser/CuraJS.js"></script>
     <script>
     window.onload = function()
     {
         var slicer = new window.slicer.CuraJS();
         slicer.load(function(err, name)
         {
-            console.log(name);
+            console.log(err, name);
         });
     }
     </script>

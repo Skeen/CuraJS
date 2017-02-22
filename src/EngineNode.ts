@@ -14,7 +14,11 @@ export class EngineNode extends EventEmitter implements IEngine
 
     load(callback : ErrorCallback) : void
     {
-        callback("Not implemented!");
+        var exec = require('child_process').exec;
+        exec('echo "Hello"', function(err, stdout, stderr)
+        {
+            callback(stdout);
+        });
     }
 
     main(argv : Array<string>, callback : ErrorCallback) : void

@@ -1,7 +1,7 @@
 #################
 # PHONY TARGETS #
 #################
-all: build/CuraJS.js
+all: build/browser/CuraJS.js build/node/CuraJS.js
 
 example: all
 	node examples/index.js
@@ -28,12 +28,18 @@ build/CuraEngineInternal.js: tmp/CuraJS-Engine.js res/CuraEngineInternal.js
 	mkdir -p $(dir $@)
 	sed -e '/INSERT-CURA-ENGINE-COMPILED/ {' -e 'r $<' -e 'd' -e '}' res/CuraEngineInternal.js > $@
 
-build/CuraJS.js: dist/CuraJS.js build/CuraEngineInternal.js
+build/browser/CuraJS.js: dist/CuraJS.js build/CuraEngineInternal.js
+	mkdir -p $(dir $@)
 	./node_modules/browserify/bin/cmd.js $< -s slicer -o $@
+
+build/node/CuraJS.js: dist/CuraJS.js build/CuraEngineInternal.js
+	mkdir -p $(dir $@)
+	./node_modules/browserify/bin/cmd.js $< -s slicer --node -o $@
 
 typings/index.d.ts:
 	./node_modules/typings/dist/bin.js install
 
 TSFILES=$(wildcard src/*.ts)
 dist/CuraJS.js: $(TSFILES) typings/index.d.ts
+	mkdir -p $(dir $@)
 	./node_modules/typescript/bin/tsc --outDir dist/ src/CuraJS.ts
