@@ -1,11 +1,15 @@
 {
   "name": "curajs",
-  "version": "0.0.1",
-  "description": "JavaScript binding and compilation of CuraEngine.",
-  "main": "index.js",
+  "version": "0.0.9",
+  "description": "JavaScript interface for CuraJS-Engine.",
+  "main": "build/node/CuraJS.js",
+  "browser": "build/browser/CuraJS.js",
   "scripts": {
     "start": "make",
-    "test": "make test"
+    "test": "make test",
+    "prerelease": "make; tar -C .. -czvf publish.tar.gz CuraJS/build/ CuraJS/package.json",
+    "release": "npm publish publish.tar.gz",
+    "postrelease": "rm publish.tar.gz"
   },
   "repository": {
     "type": "git",
@@ -26,9 +30,7 @@
     "browserify": "^14.1.0",
     "mocha": "^3.2.0",
     "typedoc": "^0.5.5",
-    "typings": "^2.1.0"
-  },
-  "dependencies": {
+    "typings": "^2.1.0",
     "bufferutil": "^2.0.1",
     "detect-node": "^2.0.3",
     "utf-8-validate": "^3.0.1",
